@@ -11,19 +11,23 @@ export const GAME_CONFIG = {
   // A fun password gate. Not real security — just a cute gatekeeper.
   password: "1234",
 
-  // ── Stage 1 — Chicken Catch ───────────────────────────────
-  chickenGameDuration: 30,       // seconds to play
-  chickenCatchTarget: 50,        // chickens needed to pass
-  maxChickensOnScreen: 15,       // max simultaneous chickens
-  chickenSpawnInterval: 0.25,    // seconds between spawns
-  chickenFallSpeedMin: 80,       // min fall speed (px/s)
-  chickenFallSpeedMax: 180,      // max fall speed (px/s)
-  chickenSize: 56,               // chicken size in pixels
+  // ── Stage 1 — Catch Game ─────────────────────────────────
+  // The falling item can be ANYTHING your partner likes!
+  // Examples: "Fried Chicken", "Boba Tea", "Pizza", "Strawberry", "Taco"
+  catchItemName: "Fried Chicken",      // name of the falling item
+  catchItemImage: "/images/item.png",  // image for the falling item (place in public/images/)
+  catchGameDuration: 30,       // seconds to play
+  catchTarget: 50,             // items needed to pass
+  maxItemsOnScreen: 15,        // max simultaneous items
+  itemSpawnInterval: 0.25,     // seconds between spawns
+  itemFallSpeedMin: 80,        // min fall speed (px/s)
+  itemFallSpeedMax: 180,       // max fall speed (px/s)
+  itemSize: 56,                // item size in pixels
 
   // ── Stage 2 — Boss Battle (tug-of-war) ────────────────────
   // Position goes 0–100, starts at 50. Player pushes toward 100, boss toward 0.
   playerPushPerTap: 3,           // how much player gains per tap
-  kaiPushPerSecond: 15,          // how fast the boss pushes back
+  bossPushPerSecond: 15,         // how fast the boss pushes back
 } as const;
 
 // ── Wrong Password Messages ────────────────────────────────
@@ -35,7 +39,7 @@ export const WRONG_PASSWORD_MESSAGES = [
   "Hmm... that's not right",
   `${GAME_CONFIG.senderName} says: Access denied!`,
   `Only ${GAME_CONFIG.recipientName} knows the password...`,
-  "Are you sure you're not a chicken?",
+  `Are you sure you're not a ${GAME_CONFIG.catchItemName.toLowerCase()}?`,
   `Wrong! ${GAME_CONFIG.senderName} is watching you`,
   "Wrong password! Try again~",
 ];
@@ -66,12 +70,12 @@ export const TEXT = {
   identityWelcome: `Welcome ${GAME_CONFIG.recipientName}!`,
   identityGameStart: "Let the games begin~",
 
-  // Stage 1 — Chicken Catch
-  chickenTitle: `Make ${GAME_CONFIG.senderName} happy!`,
-  chickenSubtitle: `Help ${GAME_CONFIG.senderName} catch fried chicken!`,
-  chickenWinMessage: `${GAME_CONFIG.senderName} is happy!`,
-  chickenLoseMessage: `${GAME_CONFIG.senderName} is still hungry...`,
-  chickenLoseDetail: "Not enough, need more!",
+  // Stage 1 — Catch Game
+  catchTitle: `Make ${GAME_CONFIG.senderName} happy!`,
+  catchSubtitle: `Help ${GAME_CONFIG.senderName} catch ${GAME_CONFIG.catchItemName}!`,
+  catchWinMessage: `${GAME_CONFIG.senderName} is happy!`,
+  catchLoseMessage: `${GAME_CONFIG.senderName} needs more...`,
+  catchLoseDetail: "Not enough, try again!",
 
   // Stage 2 — Boss Battle
   bossTitle: "FINAL BOSS",

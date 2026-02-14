@@ -17,20 +17,20 @@ interface FloatingScore {
   y: number;
 }
 
-const CHICKEN_IMG = "/images/chicken.png";
+const ITEM_IMG = GAME_CONFIG.catchItemImage;
 const CURSOR_SIZE = 72;
 const CURSOR_OFFSET = CURSOR_SIZE / 2;
 
-const HS_KEY = "chicken-catch-highscore";
+const HS_KEY = "catch-game-highscore";
 
 export default function ChickenCatch({ state, dispatch }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const chickensRef = useRef<Chicken[]>([]);
+  const itemsRef = useRef<Chicken[]>([]);
   const nextIdRef = useRef(0);
   const spawnTimerRef = useRef(0);
   const elapsedRef = useRef(0);
   const cursorRef = useRef<HTMLDivElement>(null);
-  const [chickens, setChickens] = useState<Chicken[]>([]);
+  const [items, setItems] = useState<Chicken[]>([]);
   const [floatingScores, setFloatingScores] = useState<FloatingScore[]>([]);
   const [isHappy, setIsHappy] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
@@ -53,9 +53,9 @@ export default function ChickenCatch({ state, dispatch }: Props) {
     }
   }, [state.status, state.score, highScore]);
 
-  // Initialize chicken pool
+  // Initialize item pool
   useEffect(() => {
-    chickensRef.current = [];
+    itemsRef.current = [];
     nextIdRef.current = 0;
     spawnTimerRef.current = 0;
     elapsedRef.current = 0;
@@ -103,7 +103,7 @@ export default function ChickenCatch({ state, dispatch }: Props) {
     updateCursorPosition(e.touches[0].clientX, e.touches[0].clientY);
   }, [updateCursorPosition]);
 
-  // Animation loop for chicken spawning + falling
+  // Animation loop for item spawning + falling
   useAnimationLoop(
     (delta) => {
       if (!containerRef.current) return;
@@ -113,61 +113,61 @@ export default function ChickenCatch({ state, dispatch }: Props) {
 
       // Track elapsed time for speed ramp-up
       elapsedRef.current += delta;
-      const speedMultiplier = 1 + elapsedRef.current / GAME_CONFIG.chickenGameDuration;
+      const speedMultiplier = 1 + elapsedRef.current / GAME_CONFIG.catchGameDuration;
 
-      // Spawn new chickens
+      // Spawn new items
       spawnTimerRef.current += delta;
       if (
-        spawnTimerRef.current >= GAME_CONFIG.chickenSpawnInterval &&
-        chickensRef.current.filter((c) => c.active && !c.caught).length <
-          GAME_CONFIG.maxChickensOnScreen
+        spawnTimerRef.current >= GAME_CONFIG.itemSpawnInterval &&
+        itemsRef.current.filter((c) => c.active && !c.caught).length <
+          GAME_CONFIG.maxItemsOnScreen
       ) {
         spawnTimerRef.current = 0;
         const baseSpeed =
-          GAME_CONFIG.chickenFallSpeedMin +
+          GAME_CONFIG.itemFallSpeedMin +
           Math.random() *
-            (GAME_CONFIG.chickenFallSpeedMax - GAME_CONFIG.chickenFallSpeedMin);
-        const chicken: Chicken = {
+            (GAME_CONFIG.itemFallSpeedMax - GAME_CONFIG.itemFallSpeedMin);
+        const item: Chicken = {
           id: nextIdRef.current++,
-          x: Math.random() * (width - GAME_CONFIG.chickenSize),
-          y: -GAME_CONFIG.chickenSize,
+          x: Math.random() * (width - GAME_CONFIG.itemSize),
+          y: -GAME_CONFIG.itemSize,
           speed: baseSpeed * speedMultiplier,
           rotation: Math.random() * 360,
           rotationSpeed: (Math.random() - 0.5) * 120,
           active: true,
           caught: false,
         };
-        chickensRef.current.push(chicken);
+        itemsRef.current.push(item);
       }
 
       // Update positions
-      for (const chicken of chickensRef.current) {
-        if (!chicken.active || chicken.caught) continue;
-        chicken.y += chicken.speed * delta;
-        chicken.rotation += chicken.rotationSpeed * delta;
-        if (chicken.y > height + GAME_CONFIG.chickenSize) {
-          chicken.active = false;
+      for (const item of itemsRef.current) {
+        if (!item.active || item.caught) continue;
+        item.y += item.speed * delta;
+        item.rotation += item.rotationSpeed * delta;
+        if (item.y > height + GAME_CONFIG.itemSize) {
+          item.active = false;
         }
       }
 
-      // Clean up inactive chickens
-      chickensRef.current = chickensRef.current.filter(
+      // Clean up inactive items
+      itemsRef.current = itemsRef.current.filter(
         (c) => c.active || c.caught
       );
 
       // Sync to React state for rendering
-      setChickens([...chickensRef.current.filter((c) => c.active && !c.caught)]);
+      setItems([...itemsRef.current.filter((c) => c.active && !c.caught)]);
     },
     state.status === "playing"
   );
 
-  const handleCatchChicken = useCallback(
-    (chickenId: number, x: number, y: number) => {
-      const chicken = chickensRef.current.find((c) => c.id === chickenId);
-      if (!chicken || chicken.caught) return;
+  const handleCatchItem = useCallback(
+    (itemId: number, x: number, y: number) => {
+      const item = itemsRef.current.find((c) => c.id === itemId);
+      if (!item || item.caught) return;
 
-      chicken.caught = true;
-      chicken.active = false;
+      item.caught = true;
+      item.active = false;
       dispatch({ type: "CATCH_CHICKEN" });
 
       // Show +1 floating score
@@ -188,16 +188,16 @@ export default function ChickenCatch({ state, dispatch }: Props) {
   if (state.status === "idle") {
     return (
       <div className="flex flex-col items-center justify-center min-h-[100dvh] px-6 animate-fade-in-up">
-        <img src="/images/chicken.png" alt="chicken" className="w-20 h-20 object-contain mb-4" />
+        <img src={ITEM_IMG} alt={GAME_CONFIG.catchItemName} className="w-20 h-20 object-contain mb-4" />
         <h1 className="text-2xl md:text-3xl font-black text-warm-800 mb-2 text-center">
-          {TEXT.chickenTitle}
+          {TEXT.catchTitle}
         </h1>
         <p className="text-rose mb-2 text-center font-semibold">
-          {TEXT.chickenSubtitle}
+          {TEXT.catchSubtitle}
         </p>
         <p className="text-warm-500 mb-6 text-center text-sm">
-          Catch {GAME_CONFIG.chickenCatchTarget} in{" "}
-          {GAME_CONFIG.chickenGameDuration} seconds!
+          Catch {GAME_CONFIG.catchTarget} in{" "}
+          {GAME_CONFIG.catchGameDuration} seconds!
         </p>
         <button
           onPointerDown={() => dispatch({ type: "START_CHICKEN_GAME" })}
@@ -230,10 +230,10 @@ export default function ChickenCatch({ state, dispatch }: Props) {
       <div className="absolute top-0 left-0 right-0 z-30 px-4 py-3 bg-white/80 backdrop-blur-sm">
         <div className="flex justify-between items-center">
           <div className="font-black text-warm-800 text-lg">
-            <img src="/images/chicken.png" alt="" className="inline w-6 h-6 object-contain" /> x {state.score}
+            <img src={ITEM_IMG} alt="" className="inline w-6 h-6 object-contain" /> x {state.score}
             <span className="text-warm-500 text-sm font-semibold">
               {" "}
-              / {GAME_CONFIG.chickenCatchTarget}
+              / {GAME_CONFIG.catchTarget}
             </span>
           </div>
           <div
@@ -251,29 +251,29 @@ export default function ChickenCatch({ state, dispatch }: Props) {
         )}
       </div>
 
-      {/* Falling chickens */}
-      {chickens.map((chicken) => (
+      {/* Falling items */}
+      {items.map((item) => (
         <div
-          key={chicken.id}
+          key={item.id}
           onPointerDown={(e) => {
             e.preventDefault();
-            handleCatchChicken(chicken.id, chicken.x, chicken.y);
+            handleCatchItem(item.id, item.x, item.y);
           }}
           className="absolute select-none"
           style={{
             left: 0,
             top: 0,
-            transform: `translate3d(${chicken.x}px, ${chicken.y}px, 0) rotate(${chicken.rotation}deg)`,
-            width: GAME_CONFIG.chickenSize,
-            height: GAME_CONFIG.chickenSize,
+            transform: `translate3d(${item.x}px, ${item.y}px, 0) rotate(${item.rotation}deg)`,
+            width: GAME_CONFIG.itemSize,
+            height: GAME_CONFIG.itemSize,
             cursor: "none",
             zIndex: 10,
             willChange: "transform",
           }}
         >
           <img
-            src={CHICKEN_IMG}
-            alt="chicken"
+            src={ITEM_IMG}
+            alt={GAME_CONFIG.catchItemName}
             draggable={false}
             style={{ width: "100%", height: "100%", objectFit: "contain" }}
           />
@@ -325,12 +325,12 @@ export default function ChickenCatch({ state, dispatch }: Props) {
           <div className="bg-white rounded-3xl p-8 mx-4 text-center animate-bounce-in shadow-2xl">
             {state.status === "won" ? (
               <>
-                <div className="text-5xl mb-3 flex items-center justify-center gap-2">😋<img src="/images/chicken.png" alt="" className="w-12 h-12 object-contain" /></div>
+                <div className="text-5xl mb-3 flex items-center justify-center gap-2">😋<img src={ITEM_IMG} alt="" className="w-12 h-12 object-contain" /></div>
                 <h2 className="text-2xl font-black text-warm-800 mb-2">
-                  {TEXT.chickenWinMessage}
+                  {TEXT.catchWinMessage}
                 </h2>
                 <p className="text-rose font-semibold">
-                  Score: {state.score} <img src="/images/chicken.png" alt="" className="inline w-5 h-5 object-contain" />
+                  Score: {state.score} <img src={ITEM_IMG} alt="" className="inline w-5 h-5 object-contain" />
                 </p>
                 {state.score >= highScore && highScore > 0 && (
                   <p className="text-gold font-black text-sm mt-1">New record!</p>
@@ -343,10 +343,10 @@ export default function ChickenCatch({ state, dispatch }: Props) {
               <>
                 <div className="text-5xl mb-3">😢</div>
                 <h2 className="text-2xl font-black text-warm-800 mb-2">
-                  {TEXT.chickenLoseMessage}
+                  {TEXT.catchLoseMessage}
                 </h2>
                 <p className="text-rose font-semibold mb-1">
-                  Only caught {state.score} — {TEXT.chickenLoseDetail}
+                  Only caught {state.score} — {TEXT.catchLoseDetail}
                 </p>
                 {state.score >= highScore && highScore > 0 && (
                   <p className="text-gold font-black text-sm mb-3">New record!</p>

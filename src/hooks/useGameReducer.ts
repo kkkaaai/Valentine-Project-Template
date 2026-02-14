@@ -12,7 +12,7 @@ const initialState: GameState = {
   },
   chickenCatch: {
     score: 0,
-    timeLeft: GAME_CONFIG.chickenGameDuration,
+    timeLeft: GAME_CONFIG.catchGameDuration,
     status: "idle",
   },
   bossBattle: {
@@ -82,7 +82,7 @@ function handleChickenCatch(state: GameState, action: GameAction): GameState {
         ...state,
         chickenCatch: {
           score: 0,
-          timeLeft: GAME_CONFIG.chickenGameDuration,
+          timeLeft: GAME_CONFIG.catchGameDuration,
           status: "playing",
         },
       };
@@ -96,7 +96,7 @@ function handleChickenCatch(state: GameState, action: GameAction): GameState {
       if (cc.status !== "playing") return state;
       const newTime = cc.timeLeft - 1;
       if (newTime <= 0) {
-        const won = cc.score >= GAME_CONFIG.chickenCatchTarget;
+        const won = cc.score >= GAME_CONFIG.catchTarget;
         return {
           ...state,
           chickenCatch: {
@@ -116,7 +116,7 @@ function handleChickenCatch(state: GameState, action: GameAction): GameState {
         ...state,
         chickenCatch: {
           score: 0,
-          timeLeft: GAME_CONFIG.chickenGameDuration,
+          timeLeft: GAME_CONFIG.catchGameDuration,
           status: "idle",
         },
       };
@@ -156,7 +156,7 @@ function handleBossBattle(state: GameState, action: GameAction): GameState {
     }
     case "BOSS_TICK": {
       if (bb.status !== "playing") return state;
-      const newPos = Math.max(bb.position - GAME_CONFIG.kaiPushPerSecond * action.delta, 0);
+      const newPos = Math.max(bb.position - GAME_CONFIG.bossPushPerSecond * action.delta, 0);
       if (newPos <= 0) {
         return {
           ...state,
